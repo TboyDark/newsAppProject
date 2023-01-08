@@ -1,6 +1,5 @@
 import '../css/style.css';
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
     apiKey: process.env.API_KEY,
@@ -12,7 +11,6 @@ const firebaseConfig = {
     measurementId: process.env.MEASUREMENT_ID    
 };
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
   
 
 

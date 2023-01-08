@@ -1,5 +1,6 @@
 import '../css/style.css';
 import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
     apiKey: process.env.API_KEY,
@@ -9,9 +10,10 @@ const firebaseConfig = {
     messagingSenderId: process.env.MESSAGING_SENDER_ID,
     appId: process.env.APP_ID,
     measurementId: process.env.MEASUREMENT_ID    
-  };
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+};
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+  
 
 
 let c= 1;

@@ -1,0 +1,9 @@
+.env
+dist
+node_modules
+.netlify
+.firebaserc
+firebase.json
+.github
+.firebase
+public

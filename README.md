@@ -15,7 +15,7 @@ for the max list of the stories.
 - if you want more news, just click the button!
 
 ## _Where i can see your site?_
-### at this link! [Tboy Hacker News](https://newsappproject-31736.firebaseapp.com/) 
+### at this link! [Tboy Hacker News](https://newsappproject-29257.web.app/) 
 
 
 

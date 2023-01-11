@@ -4,6 +4,7 @@ import axios from 'axios';
 import { initializeApp } from "firebase/app";
 
 
+// firebase config for Host
 const firebaseConfig = {
     apiKey: process.env.API_KEY,
     authDomain: process.env.AUTH_DOMAIN,
@@ -15,64 +16,82 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 
-let c= 1;
-function fetchData(c){
+//  Functions
+function fetchData(size){
     axios.get(process.env.HACKER_NEWS_URL)
     .then(response => {
-        let newsDisplayed = response.data; 
-        let newsContainer = document.createElement("div");
-        let containerAll = document.createElement("div");
-        containerAll.className = "containerAll";
-        newsContainer.className = "containerNews";
-        document.body.append(containerAll);
+        let newsDisplayed = response.data;        
         containerAll.append(newsContainer);
-        let i;
-        for(i=(c*10)-10; i < 10*c && i < newsDisplayed.length; i++){
-            axios.get(process.env.TITLE_NEWS_URL + newsDisplayed[i] + '.json')
-            .then(response=>{
-                let detailedNews = response.data;                                   
-                let titleNews = document.createElement("h2");
-                let linkNews = document.createElement("a");
-                let dateNews = document. createElement("p");
-                let dateTranslator = new Date(_.get(detailedNews, 'time')*1000);
-                let hours = dateTranslator.getHours();
-                let minutes = "0" + dateTranslator.getMinutes();
-                let seconds = "0" + dateTranslator.getSeconds();
-                let formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
-                linkNews.className = 'linkNews';
-                linkNews.setAttribute("target","_blank");
-                linkNews.setAttribute("rel","noopener noreferrer")
-                dateNews.className = 'dateNews';                      
-                titleNews.className = 'newsTitle';
-                titleNews.innerHTML = "•   " + _.get(detailedNews, 'title');
-                if(_.get(detailedNews,"url") == undefined){
-                 linkNews.innerHTML = "";
-                }
-                else{
-                    linkNews.innerHTML =  "         " + "News link";
-                    linkNews.href = _.get(detailedNews, 'url');
-                }
-                dateNews.innerHTML = "- Date:  " + formattedTime+"   -";
-                newsContainer.append(titleNews);
-                titleNews.append(dateNews, linkNews);
-                if(i==500){button.style.display = "none";}
-            })
-            .catch(error => {
-                throw(error)
-            });
-        };    
+        _(newsDisplayed).slice(0, size).forEach((n)=>{
+            fetchNewsData(n);
+        });    
     })
     .catch(error => {
-        throw(error)
+        alert(error);
     }); 
+};
+
+function fetchNewsData(array){
+   return axios.get(process.env.TITLE_NEWS_URL + array + '.json')
+    .then(response=>{                
+        let detailedNews = response.data;                
+        let titleNews = document.createElement("h2");
+        let linkNews = document.createElement("a");
+        let dateNews = document. createElement("p");
+        linkNews.className = 'linkNews';
+        linkNews.setAttribute("target","_blank");
+        linkNews.setAttribute("rel","noopener noreferrer")
+        dateNews.className = 'dateNews';                      
+        titleNews.className = 'newsTitle';
+        let formattedTime = dateTranslator(detailedNews);
+        titleNews.innerHTML = "•   " + _.get(detailedNews, 'title');
+        if(_.get(detailedNews,"url") == undefined){
+             linkNews.innerHTML = "";
+        }
+        else{
+            linkNews.innerHTML =  "         " + "News link";
+            linkNews.href = _.get(detailedNews, 'url');
+        }
+        dateNews.innerHTML = "- Date:  " + formattedTime+"   -";
+        newsContainer.append(titleNews);
+        titleNews.append(dateNews, linkNews);
+         })
+        .catch(error => {
+            alert(error);
+        });
 }
-fetchData(c);
+
+function dateTranslator(oldDate){
+    let dateTranslator = new Date(_.get(oldDate, 'time')*1000);
+    let hours = dateTranslator.getHours();
+    let minutes = "0" + dateTranslator.getMinutes();
+    let seconds = "0" + dateTranslator.getSeconds();
+    return hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+}
+
+
+// DOM manipulation
+let newsContainer = document.createElement("div");
+let containerAll = document.createElement("div");
+containerAll.className = "containerAll";
+newsContainer.className = "containerNews";
+document.body.append(containerAll);
+
+
+
+
+//html 
+let size= 10;
+function showData(){
+    fetchData(size);
+}
+showData();
+
+// Button config
 let button = document.createElement("button");
 button.innerHTML = "Load More";
 button.className = 'LoadMoreNews';
 document.body.insertAdjacentElement("afterend", button);
-button.onclick = function(){
-    c=c+1;
-    fetchData(c);     
+button.onclick = function(){    
+    fetchData(size);     
 };
-

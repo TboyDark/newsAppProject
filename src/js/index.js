@@ -17,49 +17,30 @@ const app = initializeApp(firebaseConfig);
 
 
 //  Functions
-function fetchData(size){
-    axios.get(process.env.HACKER_NEWS_URL)
-    .then(response => {
+function fetchData(indexArr, sizeArr){
+    axios(process.env.HACKER_NEWS_URL)
+    .then(response => {        
         let newsDisplayed = response.data;        
         containerAll.append(newsContainer);
-        _(newsDisplayed).slice(0, size).forEach((n)=>{
+        _(newsDisplayed).slice(indexArr, sizeArr).forEach((n)=>{            
             fetchNewsData(n);
+            if(sizeArr == 500){button.style.display = 'none'};
         });    
     })
     .catch(error => {
-        alert(error);
+        alert("Qualcosa è andato storto! ecco i dettagli: " + error);
     }); 
 };
 
-function fetchNewsData(array){
-   return axios.get(process.env.TITLE_NEWS_URL + array + '.json')
-    .then(response=>{                
-        let detailedNews = response.data;                
-        let titleNews = document.createElement("h2");
-        let linkNews = document.createElement("a");
-        let dateNews = document. createElement("p");
-        linkNews.className = 'linkNews';
-        linkNews.setAttribute("target","_blank");
-        linkNews.setAttribute("rel","noopener noreferrer")
-        dateNews.className = 'dateNews';                      
-        titleNews.className = 'newsTitle';
-        let formattedTime = dateTranslator(detailedNews);
-        titleNews.innerHTML = "•   " + _.get(detailedNews, 'title');
-        if(_.get(detailedNews,"url") == undefined){
-             linkNews.innerHTML = "";
-        }
-        else{
-            linkNews.innerHTML =  "         " + "News link";
-            linkNews.href = _.get(detailedNews, 'url');
-        }
-        dateNews.innerHTML = "- Date:  " + formattedTime+"   -";
-        newsContainer.append(titleNews);
-        titleNews.append(dateNews, linkNews);
-         })
-        .catch(error => {
-            alert(error);
-        });
-}
+async function fetchNewsData(array){
+   try {
+        const response = await axios(process.env.TITLE_NEWS_URL + array + '.json');
+        let detailedNews = response.data;
+        writeNews(detailedNews);
+    } catch (error) {
+        alert("Qualcosa è andato storto! ecco i dettagli: " + error);
+    }
+};
 
 function dateTranslator(oldDate){
     let dateTranslator = new Date(_.get(oldDate, 'time')*1000);
@@ -67,8 +48,30 @@ function dateTranslator(oldDate){
     let minutes = "0" + dateTranslator.getMinutes();
     let seconds = "0" + dateTranslator.getSeconds();
     return hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
-}
+};
 
+function writeNews(data){
+    let titleNews = document.createElement("h2");
+    let linkNews = document.createElement("a");
+    let dateNews = document. createElement("p");
+    linkNews.className = 'linkNews';
+    linkNews.setAttribute("target","_blank");
+    linkNews.setAttribute("rel","noopener noreferrer")
+    dateNews.className = 'dateNews';                      
+    titleNews.className = 'newsTitle';
+    let formattedTime = dateTranslator(data);
+    titleNews.innerHTML = "•   " + _.get(data, 'title');
+    if(_.get(data,"url") == undefined){
+        linkNews.innerHTML = "";
+    }
+    else{
+        linkNews.innerHTML =  "         " + "News link";
+        linkNews.href = _.get(data, 'url');
+    }
+    dateNews.innerHTML = "- Date:  " + formattedTime+"   -";
+    newsContainer.append(titleNews);
+    titleNews.append(dateNews, linkNews);    
+};
 
 // DOM manipulation
 let newsContainer = document.createElement("div");
@@ -80,18 +83,19 @@ document.body.append(containerAll);
 
 
 
-//html 
+//main source
+let index = 0; 
 let size= 10;
-function showData(){
-    fetchData(size);
-}
-showData();
+fetchData(index, size);
+
 
 // Button config
 let button = document.createElement("button");
 button.innerHTML = "Load More";
 button.className = 'LoadMoreNews';
 document.body.insertAdjacentElement("afterend", button);
-button.onclick = function(){    
-    fetchData(size);     
+button.onclick = function(){ 
+    index = size;
+    size = size + 10;   
+    fetchData(index, size);     
 };

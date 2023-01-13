@@ -22,10 +22,13 @@ function fetchData(indexArr, sizeArr){
     .then(response => {        
         let newsDisplayed = response.data;        
         containerAll.append(newsContainer);
-        _(newsDisplayed).slice(indexArr, sizeArr).forEach((n)=>{            
-            fetchNewsData(n);
-            if(sizeArr == 500){button.style.display = 'none'};
-        });    
+        const newsPromise = _(newsDisplayed).slice(indexArr, sizeArr).map(n => fetchNewsData(n));
+        Promise.all(newsPromise).then(news => {
+            news.forEach(writeNews);
+            if (sizeArr == 500) {
+                button.style.display = 'none';
+            }
+        });
     })
     .catch(error => {
         alert("Qualcosa è andato storto! ecco i dettagli: " + error);
@@ -35,8 +38,7 @@ function fetchData(indexArr, sizeArr){
 async function fetchNewsData(array){
    try {
         const response = await axios(process.env.TITLE_NEWS_URL + array + '.json');
-        let detailedNews = response.data;
-        writeNews(detailedNews);
+        return response.data;
     } catch (error) {
         alert("Qualcosa è andato storto! ecco i dettagli: " + error);
     }
